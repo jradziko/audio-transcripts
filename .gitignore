@@ -1,0 +1,14 @@
+venv
+
+# Model cache directories
+model_cache/
+*.wav
+*_preprocessed.wav
+*_transcription.txt
+*_transcription_with_speakers.csv
+*_transcription_readable.txt
+
+# Hugging Face cache
+.cache/
+transformers_cache/
+token
