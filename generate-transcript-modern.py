@@ -1,17 +1,13 @@
 import whisper
 from pyannote.audio import Pipeline
-from pyannote.core import Segment
 import torch
 import torchaudio
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 import os
-import csv
 import subprocess
 import sys
 from huggingface_hub import HfApi
-import numpy as np
-from scipy.signal import resample
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -305,32 +301,12 @@ def improved_speaker_assignment(whisper_segments, diarization):
 
 def save_results(segments, file_path):
     """
-    Save transcription results in multiple formats.
+    Save transcription results as readable text with speaker labels.
     """
     base_name = os.path.splitext(file_path)[0]
     
-    # Save as CSV
-    csv_file = base_name + "_transcription_with_speakers.csv"
-    try:
-        with open(csv_file, "w", newline="", encoding='utf-8') as csvfile:
-            csvwriter = csv.writer(csvfile)
-            csvwriter.writerow(["Speaker", "Start Time (s)", "End Time (s)", "Duration (s)", "Text"])
-            
-            for segment in segments:
-                duration = segment['end'] - segment['start']
-                csvwriter.writerow([
-                    segment['speaker'],
-                    f"{segment['start']:.2f}",
-                    f"{segment['end']:.2f}",
-                    f"{duration:.2f}",
-                    segment['text']
-                ])
-        print(f"CSV file saved: {csv_file}")
-    except Exception as e:
-        print(f"Error saving CSV file: {e}")
-    
     # Save as readable text
-    txt_file = base_name + "_transcription_readable.txt"
+    txt_file = base_name + "_transcription.txt"
     try:
         with open(txt_file, "w", encoding='utf-8') as f:
             current_speaker = None
@@ -339,11 +315,11 @@ def save_results(segments, file_path):
                     current_speaker = segment['speaker']
                     f.write(f"\n\n[{current_speaker}]:\n")
                 f.write(f"{segment['text']} ")
-        print(f"Readable text file saved: {txt_file}")
+        print(f"Transcription saved: {txt_file}")
     except Exception as e:
-        print(f"Error saving readable text file: {e}")
+        print(f"Error saving transcription: {e}")
     
-    return csv_file, txt_file
+    return txt_file
 
 
 def main():
@@ -392,7 +368,7 @@ def main():
     print("\n")
     
     # Step 11: Save results
-    csv_file, txt_file = save_results(segments, file_path)
+    txt_file = save_results(segments, file_path)
     
     # Cleanup preprocessed file
     try:
@@ -401,9 +377,8 @@ def main():
     except:
         pass
     
-    print("=== Process Completed Successfully! ===")
-    print(f"CSV file: {csv_file}")
-    print(f"Readable text file: {txt_file}")
+    print("\n=== Process Completed Successfully! ===")
+    print(f"Output file: {txt_file}")
 
 
 if __name__ == "__main__":
